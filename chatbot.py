@@ -10,17 +10,20 @@ load_dotenv()
 # Read API Key
 api_key = os.getenv("GEMINI_API_KEY")
 
-if not api_key:
-    raise ValueError("GEMINI_API_KEY not found in .env")
-
-# Initialize Gemini Client
-client = genai.Client(api_key=api_key)
+# Initialize Gemini Client only if an API key is available
+client = genai.Client(api_key=api_key) if api_key else None
 
 
 def get_ai_response(user_message, chat_history):
     """
     Generate AI response using Gemini.
     """
+
+    if client is None:
+        return (
+            "⚠️ Gemini API key is not configured. "
+            "Please set GEMINI_API_KEY in your deployment environment."
+        )
 
     conversation = HR_SYSTEM_PROMPT + "\n\n"
 

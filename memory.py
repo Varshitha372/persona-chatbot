@@ -5,7 +5,21 @@ This module manages the chat history using Streamlit Session State.
 It helps the chatbot remember the conversation during the current session.
 """
 
+import os
+import time
+from dotenv import load_dotenv
+from google import genai
 import streamlit as st
+from prompts import HR_SYSTEM_PROMPT
+
+# Load environment variables
+load_dotenv()
+
+# Read API Key
+api_key = os.getenv("GEMINI_API_KEY")
+
+# Initialize Gemini Client only if the key exists
+client = genai.Client(api_key=api_key) if api_key else None
 
 
 def initialize_memory():
