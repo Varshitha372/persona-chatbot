@@ -1,16 +1,15 @@
-from pypdf import PdfReader
+try:
+    from pypdf import PdfReader
+except ImportError:
+    PdfReader = None
 
-def extract_resume_text(uploaded_file):
-    """
-    Temporary function for testing deployment.
-    Resume parsing is disabled.
-    """
-    return "Resume parsing is temporarily disabled."
 
 def extract_resume_text(uploaded_file):
     """
     Extract text from uploaded PDF resume.
     """
+    if PdfReader is None:
+        return "Resume parsing is temporarily disabled because the pypdf package is not installed."
 
     reader = PdfReader(uploaded_file)
 

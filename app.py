@@ -6,7 +6,12 @@ Main Streamlit application for the AI Interview Coach.
 
 import streamlit as st
 
-from resume_parser import extract_resume_text
+try:
+    from resume_parser import extract_resume_text
+except ImportError:
+    def extract_resume_text(uploaded_file):
+        return "Resume parsing is temporarily disabled because the resume_parser module is unavailable."
+
 from chatbot import get_ai_response
 from memory import (
     initialize_memory,
