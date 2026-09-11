@@ -171,5 +171,5 @@ Candidate Question:
 st.markdown("---")
 
 st.caption(
-    "Developed by Andaluri Varshitha | AI Interview Coach | GenAI Assessment 2026"
+    "Developed by Andaluri Varshitha | AI Interview Coach |"
 )
