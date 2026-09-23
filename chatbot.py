@@ -1,22 +1,35 @@
 import os
 import time
+
 from dotenv import load_dotenv
 from google import genai
-from prompts import HR_SYSTEM_PROMPT
+
+from prompts import get_system_prompt
+
 
 # Load environment variables
 load_dotenv()
 
-# Read API Key
+# Read API key
 api_key = os.getenv("GEMINI_API_KEY")
 
-# Initialize Gemini Client only if an API key is available
+# Initialize Gemini client
 client = genai.Client(api_key=api_key) if api_key else None
 
 
-def get_ai_response(user_message, chat_history):
+def get_ai_response(
+    user_message,
+    chat_history,
+    interview_mode=False,
+    resume_text=""
+):
     """
-    Generate AI response using Gemini.
+    Generate an AI response using Gemini.
+
+    Modes:
+    1. Normal Q&A
+    2. Resume-based Q&A
+    3. Interview mode
     """
 
     if client is None:
@@ -25,16 +38,22 @@ def get_ai_response(user_message, chat_history):
             "Please set GEMINI_API_KEY in your deployment environment."
         )
 
-    conversation = HR_SYSTEM_PROMPT + "\n\n"
+    # Select the correct system prompt
+    system_prompt = get_system_prompt(
+        interview_mode=interview_mode,
+        resume_text=resume_text
+    )
+
+    conversation = system_prompt + "\n\n"
 
     # Add previous conversation
     for chat in chat_history:
-        conversation += f"Candidate: {chat['user']}\n"
-        conversation += f"HR Interviewer: {chat['assistant']}\n"
+        conversation += f"User: {chat['user']}\n"
+        conversation += f"Ava: {chat['assistant']}\n\n"
 
     # Add current user message
-    conversation += f"Candidate: {user_message}\n"
-    conversation += "HR Interviewer:"
+    conversation += f"User: {user_message}\n"
+    conversation += "Ava:"
 
     # Retry API call up to 3 times
     for attempt in range(3):
@@ -44,15 +63,19 @@ def get_ai_response(user_message, chat_history):
                 contents=conversation,
             )
 
-            return response.text
+            if response.text:
+                return response.text
+
+            return "I couldn't generate a response. Please try again."
 
         except Exception as e:
+
             if attempt < 2:
-                # Wait 5 seconds before retrying
                 time.sleep(5)
+
             else:
                 return (
-                    "⚠️ The Gemini AI service is currently experiencing high demand.\n\n"
+                    "⚠️ The Gemini AI service is currently unavailable.\n\n"
                     "Please wait a few moments and try again.\n\n"
                     f"Error Details: {e}"
                 )
